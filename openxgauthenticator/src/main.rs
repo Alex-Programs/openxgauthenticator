@@ -1,3 +1,4 @@
+use std::borrow::Borrow;
 use confy::ConfyError;
 use serde::{Serialize, Deserialize};
 use std::time::SystemTime;
@@ -17,7 +18,7 @@ impl ::std::default::Default for Config {
         Config {
             username: "".to_string(),
             password: "".to_string(),
-            url: "http://127.0.0.1:8090".to_string(), // TODO change before release
+            url: "https://172.29.39.130:8090".to_string(),
         }
     }
 }
@@ -69,22 +70,72 @@ fn handle_login(config: &Config) {
         .build()
         .expect("Failed to create client");
 
-    login(&config, &client);
+    loop {
+        let mut fail_count = 0;
+
+        loop {
+            let result = login(&config, &client);
+            match result {
+                Ok(()) => {
+                    println!("Moving to keepalive loop.");
+                    break;
+                }
+                Err(err) => {
+                    println!("{}", err);
+                    println!("Sleeping for 5 seconds before retrying login.");
+                    std::thread::sleep(std::time::Duration::from_secs(5));
+                }
+            }
+        }
+
+        loop {
+            let result = keepalive(&config, &client);
+            match result {
+                Ok(()) => {
+                    println!("Sleeping for 90 seconds before retrying keepalive.");
+                    std::thread::sleep(std::time::Duration::from_secs(90));
+                    break;
+                }
+                Err(err) => {
+                    println!("{}", err);
+
+                    fail_count += 1;
+
+                    if fail_count > 3 {
+                        println!("Too many failures. Retrying login.");
+                        break;
+                    }
+                    println!("Sleeping for 5 seconds before retrying keepalive. Failure count: {}/3", fail_count);
+                    std::thread::sleep(std::time::Duration::from_secs(5));
+                }
+            }
+        }
+    }
+}
+
+// the 'a is lifetimes, saying that the references must live as long as the data in hashmap
+fn build_req<'a>(username: &'a str, password: &'a str, mode: &'a str) -> HashMap<&'a str, &'a str> {
+    let a: u64 = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs();
+    let a: &str = &a.to_string();
+
+    let mut data = HashMap::new();
+
+    data.insert("mode", mode);
+    data.insert("a", a);
+    data.insert("producttype", "0");
+    data.insert("username", username);
+
+    if mode == "191" {
+        data.insert("password", password);
+    }
+
+    data
 }
 
 fn login(config: &Config, client: &Client) -> Result<(), String> {
     println!("Logging in...");
 
-    // build request
-    let a: u64 = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs();
-    let a: &str = &a.to_string();
-    let mut data = HashMap::new();
-
-    data.insert("mode", "191");
-    data.insert("a", a);
-    data.insert("producttype", "0");
-    data.insert("username", &config.username);
-    data.insert("password", &config.password);
+    let data = build_req(&config.username, &config.password, "191");
 
     let response = client.post(format!("{}/login.xml", &config.url).as_str())
         .form(&data)
@@ -109,9 +160,37 @@ fn login(config: &Config, client: &Client) -> Result<(), String> {
     Ok(())
 }
 
+fn keepalive(config: &Config, client: &Client) -> Result<(), String> {
+    println!("Keeping alive...");
+
+    let data = build_req(&config.username, &config.password, "192");
+
+    let response = client.post(format!("{}/live", &config.url).as_str())
+        .form(&data)
+        .send();
+
+    match response {
+        Ok(response) => {
+            if response.status() != reqwest::StatusCode::OK {
+                println!("Keepalive failed. Status code: {}", response.status());
+                return Err("Invalid status code".to_owned());
+            }
+        }
+        Err(err) => {
+            println!("Failed to keepalive: {}", err);
+
+            return Err(err.to_string());
+        }
+    }
+
+    println!("Keepalive successful.");
+
+    Ok(())
+}
+
 // TODO:
-// Keepalive func
-// actually loop etc
+// make hashmap use String not &str in order to safely return from the creation function without using references
+// error handling
 // ensure ctrl+c works as intended
 // switch over hosts
 // test
