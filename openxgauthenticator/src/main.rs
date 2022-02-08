@@ -4,8 +4,11 @@ use std::time::SystemTime;
 use reqwest;
 use reqwest::blocking::Client;
 use std::collections::hash_map::HashMap;
+
 extern crate rpassword;
+
 use ansi_term::Colour::{Red};
+use std::env;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Config {
@@ -40,7 +43,11 @@ fn main() {
 
     if config.username == "" || config.password == "" {
         println!("No credentials found. Please enter your credentials.");
-        println!("Credentials entered here will be stored {} in this directory.", Red.bold().underline().paint("in plaintext"));
+        if env::consts::OS == "windows".to_string() {
+            println!("Credentials entered here will be stored IN PLAINTEXT in this directory.");
+        } else {
+            println!("Credentials entered here will be stored {} in this directory.", Red.bold().underline().paint("in plaintext"));
+        }
 
         let mut username = String::new();
         let mut password = String::new();
@@ -73,7 +80,12 @@ fn main() {
             .expect("Failed to store credentials");
 
         println!("Credentials saved.");
-        println!("To change credentials in the future, modify the file {}.", Red.bold().underline().paint("'config.toml'"));
+
+        if env::consts::OS == "windows".to_string() {
+            println!("To change credentials in the future, modify the file 'config.toml'");
+        } else {
+            println!("To change credentials in the future, modify the file {}.", Red.bold().underline().paint("'config.toml'"));
+        }
     }
 
     handle_login(&config);
