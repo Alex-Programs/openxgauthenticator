@@ -21,7 +21,7 @@ impl ::std::default::Default for Config {
         Config {
             username: "".to_string(),
             password: "".to_string(),
-            url: "https://172.29.39.130:8090".to_string(), // todo change before release
+            url: "https://172.29.39.130:8090".to_string(),
             keepalive_delay: 90,
             retry_delay: 5,
         }
@@ -69,8 +69,6 @@ fn main() {
 }
 
 fn handle_login(config: &Config) {
-    println!("Handling login...");
-
     let client: reqwest::blocking::Client = reqwest::blocking::Client::builder()
         .danger_accept_invalid_certs(true)
         .build()
@@ -163,8 +161,6 @@ fn login(config: &Config, client: &Client) -> Result<(), String> {
         }
     }
 
-    println!("Login successful.");
-
     Ok(())
 }
 
@@ -175,7 +171,8 @@ fn keepalive(config: &Config, client: &Client) -> Result<(), String> {
 
     // yes, get. yes, sophos is that stupid.
     let response = client.get(format!("{}/live", &config.url).as_str())
-        .form(&data)
+        // yes params. yes it's inconsistent. yes it's stupid
+        .query(&data)
         .send();
 
     match response {
@@ -192,15 +189,7 @@ fn keepalive(config: &Config, client: &Client) -> Result<(), String> {
         }
     }
 
-    println!("Keepalive successful.");
-
     Ok(())
 }
 
-// TODO:
-// error handling
-// ensure ctrl+c works as intended
-// go over prints
-// switch over hosts
-// test
-// release
+// TODO: Dist website
