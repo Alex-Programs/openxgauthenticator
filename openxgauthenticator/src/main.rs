@@ -1,16 +1,19 @@
-use std::borrow::Borrow;
 use confy::ConfyError;
 use serde::{Serialize, Deserialize};
 use std::time::SystemTime;
 use reqwest;
 use reqwest::blocking::Client;
 use std::collections::hash_map::HashMap;
+extern crate rpassword;
+use ansi_term::Colour::{Red};
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Config {
     username: String,
     password: String,
     url: String,
+    keepalive_delay: u64,
+    retry_delay: u64,
 }
 
 impl ::std::default::Default for Config {
@@ -18,7 +21,9 @@ impl ::std::default::Default for Config {
         Config {
             username: "".to_string(),
             password: "".to_string(),
-            url: "https://172.29.39.130:8090".to_string(),
+            url: "https://172.29.39.130:8090".to_string(), // todo change before release
+            keepalive_delay: 90,
+            retry_delay: 5,
         }
     }
 }
@@ -28,11 +33,12 @@ fn main() {
 
     let mut config: Config = match credentials {
         Ok(credentials) => credentials,
-        Err(err) => Config::default(),
+        Err(_) => Config::default(),
     };
 
     if config.username == "" || config.password == "" {
         println!("No credentials found. Please enter your credentials.");
+        println!("Credentials entered here will be stored {} in this directory.", Red.bold().underline().paint("in plaintext"));
 
         let mut username = String::new();
         let mut password = String::new();
@@ -45,8 +51,8 @@ fn main() {
 
         while password == "" {
             println!("Password:");
-            std::io::stdin().read_line(&mut password)
-                .expect("Failed to read line");
+            password = rpassword::read_password()
+                .expect("Failed to read password");
         }
 
         config.username = username.trim().to_string();
@@ -56,7 +62,7 @@ fn main() {
             .expect("Failed to store credentials");
 
         println!("Credentials saved.");
-        println!("To change credentials in the future, modify the file 'config.toml'.");
+        println!("To change credentials in the future, modify the file {}.", Red.bold().underline().paint("'config.toml'"));
     }
 
     handle_login(&config);
@@ -71,30 +77,31 @@ fn handle_login(config: &Config) {
         .expect("Failed to create client");
 
     loop {
-        let mut fail_count = 0;
-
         loop {
             let result = login(&config, &client);
             match result {
                 Ok(()) => {
-                    println!("Moving to keepalive loop.");
+                    println!("Success logging in! Moving to keepalive loop.");
                     break;
                 }
                 Err(err) => {
                     println!("{}", err);
-                    println!("Sleeping for 5 seconds before retrying login.");
-                    std::thread::sleep(std::time::Duration::from_secs(5));
+                    println!("Failure! Sleeping for {} seconds before retrying login.", config.retry_delay);
+                    std::thread::sleep(std::time::Duration::from_secs(config.retry_delay));
                 }
             }
         }
+
+        let mut fail_count = 0;
 
         loop {
             let result = keepalive(&config, &client);
             match result {
                 Ok(()) => {
-                    println!("Sleeping for 90 seconds before retrying keepalive.");
-                    std::thread::sleep(std::time::Duration::from_secs(90));
-                    break;
+                    println!("Success! Sleeping for {} seconds before redoing keepalive.", config.keepalive_delay);
+                    std::thread::sleep(std::time::Duration::from_secs(config.keepalive_delay));
+
+                    fail_count = 0;
                 }
                 Err(err) => {
                     println!("{}", err);
@@ -103,10 +110,12 @@ fn handle_login(config: &Config) {
 
                     if fail_count > 3 {
                         println!("Too many failures. Retrying login.");
+
+                        fail_count = 0;
                         break;
                     }
-                    println!("Sleeping for 5 seconds before retrying keepalive. Failure count: {}/3", fail_count);
-                    std::thread::sleep(std::time::Duration::from_secs(5));
+                    println!("Failure! Sleeping for {} seconds before retrying keepalive. Failure count: {}/3", config.retry_delay, fail_count);
+                    std::thread::sleep(std::time::Duration::from_secs(config.retry_delay));
                 }
             }
         }
@@ -114,19 +123,18 @@ fn handle_login(config: &Config) {
 }
 
 // the 'a is lifetimes, saying that the references must live as long as the data in hashmap
-fn build_req<'a>(username: &'a str, password: &'a str, mode: &'a str) -> HashMap<&'a str, &'a str> {
+fn build_req<'a>(username: &'a str, password: &'a str, mode: &'a str) -> HashMap<&'a str, String> {
     let a: u64 = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs();
-    let a: &str = &a.to_string();
 
-    let mut data = HashMap::new();
+    let mut data: HashMap<&str, String> = HashMap::new();
 
-    data.insert("mode", mode);
-    data.insert("a", a);
-    data.insert("producttype", "0");
-    data.insert("username", username);
+    data.insert("mode", mode.to_string());
+    data.insert("a", a.to_string());
+    data.insert("producttype", "0".to_string());
+    data.insert("username", username.to_string());
 
     if mode == "191" {
-        data.insert("password", password);
+        data.insert("password", password.to_string());
     }
 
     data
@@ -165,7 +173,8 @@ fn keepalive(config: &Config, client: &Client) -> Result<(), String> {
 
     let data = build_req(&config.username, &config.password, "192");
 
-    let response = client.post(format!("{}/live", &config.url).as_str())
+    // yes, get. yes, sophos is that stupid.
+    let response = client.get(format!("{}/live", &config.url).as_str())
         .form(&data)
         .send();
 
@@ -189,9 +198,9 @@ fn keepalive(config: &Config, client: &Client) -> Result<(), String> {
 }
 
 // TODO:
-// make hashmap use String not &str in order to safely return from the creation function without using references
 // error handling
 // ensure ctrl+c works as intended
+// go over prints
 // switch over hosts
 // test
 // release

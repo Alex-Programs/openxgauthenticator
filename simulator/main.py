@@ -24,5 +24,24 @@ def login():
 
     return "Bad Request", 400
 
+@app.route("/live", methods=["GET"])
+def keepalive():
+    data = request.form
+
+    print(request.form)
+    print(data["mode"])
+    print(data["a"])
+    print(data["producttype"])
+
+    if data["mode"] == "192" and float(data["a"]) > time.time() - 10 and float(data["a"]) < time.time() + 10 and data[
+        "producttype"] == "0":
+        if data["username"] == "admin":
+            print("Valid keepalive")
+            return "keepalived"
+        else:
+            print("Invalid keepalive")
+            return "No Access", 401
+
+    return "Bad Request", 400
 
 app.run(host="0.0.0.0", port=8090, debug=True)
