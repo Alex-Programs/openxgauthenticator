@@ -14,6 +14,7 @@ struct Config {
     url: String,
     keepalive_delay: u64,
     retry_delay: u64,
+    do_stealth_ua: bool,
 }
 
 impl ::std::default::Default for Config {
@@ -24,6 +25,7 @@ impl ::std::default::Default for Config {
             url: "https://172.29.39.130:8090".to_string(),
             keepalive_delay: 90,
             retry_delay: 5,
+            do_stealth_ua: false,
         }
     }
 }
@@ -55,6 +57,15 @@ fn main() {
                 .expect("Failed to read password");
         }
 
+        println!("Confirm Password:");
+        let confirm_password = rpassword::read_password()
+            .expect("Failed to read password");
+
+        if password != confirm_password {
+            println!("Passwords do not match. Please try again.");
+            std::process::exit(1);
+        }
+
         config.username = username.trim().to_string();
         config.password = password.trim().to_string();
 
@@ -79,7 +90,7 @@ fn handle_login(config: &Config) {
             let result = login(&config, &client);
             match result {
                 Ok(()) => {
-                    println!("Success logging in! Moving to keepalive loop.");
+                    println!("Success logging in!");
                     break;
                 }
                 Err(err) => {
@@ -91,6 +102,9 @@ fn handle_login(config: &Config) {
         }
 
         let mut fail_count = 0;
+
+        println!("Beginning keepalive loop in {} secs", config.keepalive_delay);
+        std::thread::sleep(std::time::Duration::from_secs(config.keepalive_delay));
 
         loop {
             let result = keepalive(&config, &client);
@@ -138,6 +152,14 @@ fn build_req<'a>(username: &'a str, password: &'a str, mode: &'a str) -> HashMap
     data
 }
 
+fn build_ua(config: &Config) -> String {
+    if config.do_stealth_ua {
+        return "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36".to_string();
+    }
+
+    "openxgauthenticator/1.0.0 (OS not shared); Rust Reqwest; by Alex. See openxg.alexcj.co.uk".to_string()
+}
+
 fn login(config: &Config, client: &Client) -> Result<(), String> {
     println!("Logging in...");
 
@@ -145,6 +167,7 @@ fn login(config: &Config, client: &Client) -> Result<(), String> {
 
     let response = client.post(format!("{}/login.xml", &config.url).as_str())
         .form(&data)
+        .header("User-Agent", build_ua(&config))
         .send();
 
     match response {
@@ -152,6 +175,18 @@ fn login(config: &Config, client: &Client) -> Result<(), String> {
             if response.status() != reqwest::StatusCode::OK {
                 println!("Login failed. Status code: {}", response.status());
                 return Err("Invalid status code".to_owned());
+            }
+
+            let text = response.text().expect("Failure accessing response text");
+
+            if text.contains("Invalid user name/password") {
+                println!("Invalid username or password.");
+                return Err("Invalid username or password".to_owned());
+            }
+
+            if !text.contains("You are signed in as {username}") {
+                println!("Login failed due to unknown error. Response text: {}", text);
+                return Err("Login failed - unknown err".to_owned());
             }
         }
         Err(err) => {
@@ -173,6 +208,7 @@ fn keepalive(config: &Config, client: &Client) -> Result<(), String> {
     let response = client.get(format!("{}/live", &config.url).as_str())
         // yes params. yes it's inconsistent. yes it's stupid
         .query(&data)
+        .header("User-Agent", build_ua(&config))
         .send();
 
     match response {
@@ -191,5 +227,3 @@ fn keepalive(config: &Config, client: &Client) -> Result<(), String> {
 
     Ok(())
 }
-
-// TODO: Dist website

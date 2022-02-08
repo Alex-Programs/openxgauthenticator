@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>OpenXGAuthenticator</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,500;0,600;0,700;1,400;1,600;1,700&display=swap"
+          rel="stylesheet">
+
+    <meta property="og:title" content="OpenXGAuthenticator"/>
+    <meta property="og:description" content="Rust-based, open-source Sophos XG Authenticator">
+
+    <style>
+        body {
+            max-width: 800px;
+            margin: auto;
+            font-family: "JetBrains Mono", monospace;
+        }
+
+        body, html {
+            background-color: black;
+            height: 100%;
+            width: 100%;
+
+            color: white;
+        }
+
+        h1, h2, h3 {
+            text-align: center;
+        }
+
+        a {
+            color: lightblue;
+        }
+
+        a:visited {
+            color: lightblue;
+        }
+    </style>
+</head>
+<body>
+<h1><i>Free, open source Sophos XG Authenticator</i></h1>
+<p>
+Login to Sophos XG firewalls with a single command.
+</p>
+<p>
+<ul type="circle">
+    <li>
+        Open source - <a href="https://github.com/AlexAndHisScripts/openxgauthenticator">Github Repository</a>
+    </li>
+    <li>
+        Written in Rust for safety, reliability, low memory usage, easy setup, and speed
+    </li>
+    <li>
+        Configuration options for retry time, keepalive time, and whether to lie about the user-agent
+    </li>
+    <li>
+        Cross platform: Windows, Linux, MacOS
+    </li>
+    <li>
+        Local: It doesn't communicate with anything but the firewall. No data exfiltration - just check Wireshark.
+    </li>
+</ul>
+<h3>Install</h3>
+<p>
+    Download for Linux: <a href="/downloads/openxgauthenticator-linux">Here</a>
+</p>
+Download for Windows: <a href="/downloads/openxgauthenticator.exe">Here</a>
+</p>
+<p>
+    To use MacOS, compile from source as there is no good cross-compilation method and I don't have a mac.
+</p>
+<p>
+    <i>Alternatively, install a proper operating system like Linux</i>
+</p>
+<p>
+    Don't trust me? Good idea, I wouldn't either. Build from source with Rust: <a
+        href="https://github.com/AlexAndHisScripts/openxgauthenticator">Github Repository</a>
+</p>
+<h3>Usage</h3>
+<p>
+    To use, simply run the executable and enter username + password when prompted. Credentials will be saved in
+    config.toml for next time. Configuration options are also in config.toml. You can open it in any text editor.
+</p>
+<h3>By Alex</h3>
+</body>
+</html>
