@@ -10,14 +10,9 @@ def index():
     return render_template("index.html")
 
 
-@app.route("/downloads/openxgauthenticator-linux")
-def linux():
-    return send_file("../target/release/openxgauthenticator", as_attachment=True)
-
-
-@app.route("/downloads/openxgauthenticator.exe")
-def windows():
-    return send_file("../target/x86_64-pc-windows-gnu/release/openxgauthenticator.exe", as_attachment=True)
+@app.route("/downloads/<path:filename>")
+def download(filename):
+    return send_file("downloads/" + filename, as_attachment=True)
 
 
 waitress.serve(app, port=4264)

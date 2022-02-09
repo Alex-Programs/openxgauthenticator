@@ -94,6 +94,7 @@ fn main() {
 fn handle_login(config: &Config) {
     let client: reqwest::blocking::Client = reqwest::blocking::Client::builder()
         .danger_accept_invalid_certs(true)
+        .no_proxy()
         .build()
         .expect("Failed to create client");
 
