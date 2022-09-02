@@ -14,3 +14,5 @@ Advantages over their provided one:
 Prebuilt binaries available at https://openxg.alexcj.co.uk/
 
 To build yourself, install Rust stable, clone, go into `path/to/repo/openxgauthenticator/openxgauthenticator`, `cargo build --release`, and use the binary found in the `dist` folder.
+
+The simulator folder contains a simulated version of the Sophos XG login server for testing the client against during development.
