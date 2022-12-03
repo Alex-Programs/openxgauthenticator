@@ -96,64 +96,14 @@
             padding: 15px;
         }
     </style>
-</head>
-<body>
-<h1>OpenXGAuthenticator</h1>
-<h2>Free, open source Sophos XG Authenticator</h2>
-<h3>Advantages</h3>
-<ul>
-    <li>
-        Code is auditable and customisable due to being open source.
-    </li>
-    <li>
-        Easier to install, producing a single executable file.
-    </li>
-    <li>
-        Fast and lightweight
-    </li>
-    <li>
-        Handles loss of connection better
-    </li>
-    <li>
-        Additional configuration options
-    </li>
-    <li>
-        Appears to ignore some types of user-account banning, whereby the firewall simply requests the client not let
-        you join. (Unconfirmed)
-    </li>
-    <li>
-        User agent faking feature allows you to pretend you're using a browser to authenticate
-    </li>
-    <li>
-        Can be downloaded from github or the website instead of having to manually authenticate then use the local web
-        portal to download the binary.
-    </li>
-    <li>
-        Absolutely no data exfiltration, telemetry, or spyware - and you can prove it by looking at the code.
-    </li>
-</ul>
 
-</br>
-<hr>
-</br>
-
-<h2>Installation</h2>
-<h3>Precompiled binary executables (Easier)</h3>
-<p>
-    <a href="/downloads/openxgauthenticator-linux">Linux Download</a>
-</p>
-<p>
-    <a href="/downloads/openxgauthenticator.exe">Windows Download</a>
-</p>
-<h3>Precompiled binary executables with firewall circumvention</h3>
-<p>
-    This system takes slightly longer, but should evade firewalls. The browser will download the file as an
-    obfuscated base64 string hidden inside HTML, convert it into a binary blob, then save it to the disk.
-</p>
-
-<script>
+    <script>
     function logwrite(text) {
         document.getElementById("dl-logs").hidden = false;
+        if (document.getElementById("dl-logs").innerHTML === "") {
+            document.getElementById("dl-logs").innerHTML = text;
+            return
+        }
         document.getElementById("dl-logs").innerHTML = document.getElementById("dl-logs").innerHTML + "<br>" + text;
     }
 
@@ -162,7 +112,7 @@
 
         // Download the file as a base64 string, then convert it to a binary blob, then save it to the disk.
         // Use the fetch api
-        logwrite("Downloading file from " + url);
+        logwrite("Downloading file from " + window.location.protocol + "//" + window.location.host + url);
 
         fetch(url, {
             method: "GET",
@@ -213,16 +163,105 @@
         })
     }
 </script>
+</head>
+<body>
+<h1>OpenXGAuthenticator</h1>
+<h2>Free, open source Sophos XG Authenticator</h2>
+<h3>Advantages</h3>
+<ul>
+    <li>
+        Code is auditable and customisable due to being open source.
+    </li>
+    <li>
+        Easier to install, producing a single executable file.
+    </li>
+    <li>
+        Fast and lightweight
+    </li>
+    <li>
+        Handles loss of connection better
+    </li>
+    <li>
+        Additional configuration options
+    </li>
+    <li>
+        Appears to ignore some types of user-account banning, whereby the firewall simply requests the client not let
+        you join. (Unconfirmed)
+    </li>
+    <li>
+        User agent faking feature allows you to pretend you're using a browser to authenticate
+    </li>
+    <li>
+        Can be downloaded from github or the website instead of having to manually authenticate then use the local web
+        portal to download the binary.
+    </li>
+    <li>
+        Absolutely no data exfiltration, telemetry, or spyware - and you can prove it by looking at the code.
+    </li>
+</ul>
+
+</br>
+<hr>
+</br>
+
+<h2>Installation</h2>
+{% if knownfwmessage %}
+<h1 style="color: orangered">You're behind the school firewall. Make sure you use the obfuscated, firewall-evading downloads, or you'll be
+    flagged.</h1>
+
+<h3>Precompiled binary executables with firewall circumvention</h3>
+<p>
+    This system takes slightly longer, but should evade firewalls. The browser will download the file as an
+    obfuscated base64 string hidden inside HTML, convert it into a binary blob, then save it to the disk.
+</p>
 
 <div class="download-box">
     <button onclick="circumvent_download('linux')">Obfuscated Download (Linux)</button>
     <button onclick="circumvent_download('windows')">Obfuscated Download (Windows)</button>
 
-    <code><div hidden id="dl-logs"></div></code>
+    <code>
+        <div hidden id="dl-logs"></div>
+    </code>
 </div>
+{% else %}
+<h3>Precompiled binary executables (Faster download, may be blocked)</h3>
+<p>
+    <a href="/downloads/openxgauthenticator-linux">Linux Download</a>
+</p>
+<p>
+    <a href="/downloads/openxgauthenticator.exe">Windows Download</a>
+</p>
+{% endif %}
+
+{% if knownfwmessage %}
+<h3>Precompiled binary executables (Faster download, may be blocked)</h3>
+<p>
+    <a href="/downloads/openxgauthenticator-linux">Linux Download</a>
+</p>
+<p>
+    <a href="/downloads/openxgauthenticator.exe">Windows Download</a>
+</p>
+{% else %}
+<h3>Precompiled binary executables with firewall circumvention</h3>
+<p>
+    This system takes slightly longer, but should evade firewalls. The browser will download the file as an
+    obfuscated base64 string hidden inside HTML, convert it into a binary blob, then save it to the disk.
+</p>
+
+<div class="download-box">
+    <button onclick="circumvent_download('linux')">Obfuscated Download (Linux)</button>
+    <button onclick="circumvent_download('windows')">Obfuscated Download (Windows)</button>
+
+    <code>
+        <div hidden id="dl-logs"></div>
+    </code>
+</div>
+{% endif %}
 
 <p>
-    There are no precompiled MacOS binaries because I don't have one to compile on. You can still compile from source.
+    There are no precompiled MacOS binaries because I don't have a mac to compile on and the cross-compile process looks
+    like a <a href="https://wapl.es/rust/2019/02/17/rust-cross-compile-linux-to-macos.html">complete pain</a> and
+    altogether not worth it. You can still compile from source.
 </p>
 
 </br>
@@ -231,10 +270,10 @@
 
 <h3>Compile from source (Code can be checked)</h3>
 <ol>
-    <li>Install Rust Stable from your package manager or <a href="https://www.rust-lang.org/tools/install">https://www.rust-lang.org/tools/install</a>
+    <li>Install Rust Stable from your package manager or <a href="https://www.rust-lang.org/tools/install">rust-lang.org/tools/install</a>
     </li>
 
-    <li>Clone the repository (<a href="https://github.com/AlexAndHisScripts/openxgauthenticator">https://github.com/AlexAndHisScripts/openxgauthenticator</a>)
+    <li>Clone the repository (<a href="https://github.com/Alex-Programs/openxgauthenticator">github.com/Alex-Programs/openxgauthenticator</a>)
         to your local machine
     </li>
 
@@ -248,7 +287,7 @@
 
     <li>Your compiled binary executable should be in the <code>target/release</code> folder. There will be additional
         files alongside the executable - the executable should just be the file <code>openxgauthenticator</code> for
-        linux, or <code>openxgauthenticator.exe</code> for windows
+        Linux, or <code>openxgauthenticator.exe</code> for Windows
     </li>
 </ol>
 

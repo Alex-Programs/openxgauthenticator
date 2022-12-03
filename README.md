@@ -22,10 +22,14 @@ Free, open source authenticator for [Sophos XG]((https://www.sophos.com/en-us/me
 
 [Windows Download](https://openxg.alexcj.co.uk/downloads/openxgauthenticator.exe)
 
+### Circumventing download
+The website, [openxg.alexcj.co.uk](https://openxg.alexcj.co.uk), contains a tool for downloading the executables behind firewalls that block them.
+
+
 There are no precompiled MacOS binaries because I don't have one to compile on. You can still compile from source.
 
 ### Compile from source (Code can be checked)
-1. Install Rust Stable from your package manager or [https://www.rust-lang.org/tools/install](https://www.rust-lang.org/tools/install)
+1. Install Rust Stable from your package manager or [rust-lang.org/tools/install](https://www.rust-lang.org/tools/install)
 2. Clone the repository to your local machine
 3. Open the repository in a terminal and go into the `openxgauthenticator` directory
 4. [Optional] read the code in the `src` directory to check that it's safe.

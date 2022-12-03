@@ -6,11 +6,13 @@ import os
 
 app = Flask(__name__)
 
+with open("school_ip", "r") as f:
+    school_ip = f.read().strip()
 
 @app.route("/")
 @app.route("/index")
 def index():
-    return render_template("index.html")
+    return render_template("index.html", knownfwmessage=(str(request.headers.get("CF-Connecting-IP")) in school_ip))
 
 
 @app.route("/downloads/<path:filename>")
