@@ -5,8 +5,9 @@
     <title>OpenXGAuthenticator</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,800&family=Raleway:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,800&family=Raleway:wght@400;500;600;700&display=swap"
+          rel="stylesheet">
 
     <meta property="og:title" content="OpenXGAuthenticator"/>
     <meta property="og:description" content="Rust-based, open-source Sophos XG Authenticator">
@@ -71,6 +72,29 @@
             transition: all 0.05s ease-in-out;
         }
 
+        .download-box {
+            margin: 20px 0px;
+
+            border: 2px solid lightblue;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .download-box > * {
+            margin: 10px;
+        }
+
+        .download-box > code {
+            width: 100%;
+            margin-bottom: 0;
+        }
+
+        #dl-logs {
+            padding: 15px;
+        }
     </style>
 </head>
 <body>
@@ -109,7 +133,9 @@
     </li>
 </ul>
 
-</br><hr></br>
+</br>
+<hr>
+</br>
 
 <h2>Installation</h2>
 <h3>Precompiled binary executables (Easier)</h3>
@@ -119,19 +145,24 @@
 <p>
     <a href="/downloads/openxgauthenticator.exe">Windows Download</a>
 </p>
-<p id="status"></p>
 <h3>Precompiled binary executables with firewall circumvention</h3>
 <p>
-    Is a firewall getting in the way of your download? Try this button instead. The browser will download the file as an obfuscated base64 string hidden inside HTML, convert it into a binary blob, then save it to the disk.
+    This system takes slightly longer, but should evade firewalls. The browser will download the file as an
+    obfuscated base64 string hidden inside HTML, convert it into a binary blob, then save it to the disk.
 </p>
 
 <script>
+    function logwrite(text) {
+        document.getElementById("dl-logs").hidden = false;
+        document.getElementById("dl-logs").innerHTML = document.getElementById("dl-logs").innerHTML + "<br>" + text;
+    }
+
     function circumvent_download(OS) {
         var url = "/circumvent/" + OS
 
         // Download the file as a base64 string, then convert it to a binary blob, then save it to the disk.
         // Use the fetch api
-        document.getElementById("status").innerHTML = "Downloading..."
+        logwrite("Downloading file from " + url);
 
         fetch(url, {
             method: "GET",
@@ -139,14 +170,17 @@
                 "Content-Type": "application/html"
             }
         }).then(response => response.text()).then(data => {
+            logwrite("Gotten file, removing HTML padding")
             // Remove HTML padding
             // Remove HTML padding
-            document.getElementById("status").innerHTML = "Processing..."
             data = data.replace("<html><head><title>Definitely HTML</title></head><body><h1>Hello! This is totally real HTML.</h1>", "")
             data = data.replace("</body></html>", "")
 
+            logwrite("Converting base64 to binary")
             // Convert the base64 string to a binary blob. No fucking clue what this code does, copilot magically made things work?
             var binary = atob(data);
+
+            logwrite("Processing binary")
             var len = binary.length;
             var buffer = new ArrayBuffer(len);
             var view = new Uint8Array(buffer);
@@ -154,10 +188,16 @@
                 view[i] = binary.charCodeAt(i);
             }
 
-            document.getElementById("status").innerHTML = "More processing..."
+            logwrite("Creating file handler")
+
             // Save the file to the disk
             var blob = new Blob([view], {type: "application/octet-stream"});
+
+            logwrite("Creating object URL")
+
             var url = window.URL.createObjectURL(blob);
+
+            logwrite("Creating download element")
             var a = document.createElement("a");
             a.href = url;
             if (OS === "linux") {
@@ -165,31 +205,38 @@
             } else if (OS === "windows") {
                 a.download = "openxgauthenticator.exe";
             }
-            document.getElementById("status").innerHTML = "Writing..."
+
+            logwrite("Writing to disk")
             a.click()
 
-            document.getElementById("status").innerHTML = "Complete"
+            logwrite("Complete")
         })
     }
 </script>
 
-<button onclick="circumvent_download('linux')">Obfuscated Download (Linux)</button>
-</br>
-</br>
-<button onclick="circumvent_download('windows')">Obfuscated Download (Windows)</button>
+<div class="download-box">
+    <button onclick="circumvent_download('linux')">Obfuscated Download (Linux)</button>
+    <button onclick="circumvent_download('windows')">Obfuscated Download (Windows)</button>
+
+    <code><div hidden id="dl-logs"></div></code>
+</div>
 
 <p>
     There are no precompiled MacOS binaries because I don't have one to compile on. You can still compile from source.
 </p>
 
-</br><hr></br>
+</br>
+<hr>
+</br>
 
 <h3>Compile from source (Code can be checked)</h3>
 <ol>
     <li>Install Rust Stable from your package manager or <a href="https://www.rust-lang.org/tools/install">https://www.rust-lang.org/tools/install</a>
     </li>
 
-    <li>Clone the repository (<a href="https://github.com/AlexAndHisScripts/openxgauthenticator">https://github.com/AlexAndHisScripts/openxgauthenticator</a>) to your local machine</li>
+    <li>Clone the repository (<a href="https://github.com/AlexAndHisScripts/openxgauthenticator">https://github.com/AlexAndHisScripts/openxgauthenticator</a>)
+        to your local machine
+    </li>
 
     <li>Open the repository in a terminal and go into the <code>openxgauthenticator</code> directory</li>
 
@@ -205,7 +252,9 @@
     </li>
 </ol>
 
-</br><hr></br>
+</br>
+<hr>
+</br>
 
 <h2 id="usage">Usage</h2>
 
@@ -216,14 +265,18 @@
 <p>The host of the login page will be set to <code>https://172.29.39.130:8090</code> by default. Depending on your
     setup, this may need to be changed. To do so, just modify the <code>config.toml</code> file in a text editor.</p>
 
-</br><hr></br>
+</br>
+<hr>
+</br>
 
 <h3 id="optionalconfiguration">Optional Configuration</h3>
 
 <p>Additional config options in <code>config.toml</code> are:</p>
 
 <ul>
-    <li><code>keepalive_delay</code>, or the time in seconds between telling the firewall you're still there. Default is 90.</li>
+    <li><code>keepalive_delay</code>, or the time in seconds between telling the firewall you're still there. Default is
+        90.
+    </li>
 
     <li><code>retry_delay</code>, or the time between retrying a login/keepalive attempt if it fails.</li>
 
@@ -234,7 +287,9 @@
             10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36</code></li>
 </ul>
 
-</br><hr></br>
+</br>
+<hr>
+</br>
 
 <p style="text-align: center; font-family: 'JetBrains Mono', 'Raleway', monospace">
     <b><a href="https://github.com/Alex-Programs/openxgauthenticator">OpenXGAuthenticator GitHub</a></b>
