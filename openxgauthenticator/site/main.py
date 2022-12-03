@@ -1,7 +1,8 @@
 from flask import Flask, render_template, send_file, request, Response
 import waitress
 import base64
-import hashlib
+
+import os
 
 app = Flask(__name__)
 
@@ -17,15 +18,26 @@ def download(filename):
     return send_file("downloads/" + filename, as_attachment=True)
 
 
-def obfuscated_download(filename):
-    yield "<html><head><title>Definitely HTML</title></head><body><h1>Hello! This is totally real HTML.</h1>"
+def get_encoded_file(filename):
+    if os.path.exists(filename + ".enc"):
+        with open(filename + ".enc", "r") as f:
+            return f.read()
 
     with open("downloads/" + filename, "rb") as f:
         data = f.read()
         encoded = base64.encodebytes(data).decode("utf-8")
-        yield encoded
+        with open(filename + ".enc", "w") as f:
+            f.write(encoded)
+        return encoded
+
+
+def obfuscated_download(filename):
+    yield "<html><head><title>Definitely HTML</title></head><body><h1>Hello! This is totally real HTML.</h1>"
+
+    yield get_encoded_file(filename)
 
     yield "</body></html>"
+
 
 @app.route("/circumvent/<path:OS>")
 def circumvent(OS):
@@ -35,6 +47,7 @@ def circumvent(OS):
         return Response(obfuscated_download("openxgauthenticator-linux"), mimetype="text/html")
     else:
         return Response(obfuscated_download("openxgauthenticator-linux"), mimetype="text/html")
+
 
 port = 4264
 print(f"Serving on port {str(port)}")

@@ -119,6 +119,7 @@
 <p>
     <a href="/downloads/openxgauthenticator.exe">Windows Download</a>
 </p>
+<p id="status"></p>
 <h3>Precompiled binary executables with firewall circumvention</h3>
 <p>
     Is a firewall getting in the way of your download? Try this button instead. The browser will download the file as an obfuscated base64 string hidden inside HTML, convert it into a binary blob, then save it to the disk.
@@ -130,6 +131,8 @@
 
         // Download the file as a base64 string, then convert it to a binary blob, then save it to the disk.
         // Use the fetch api
+        document.getElementById("status").innerHTML = "Downloading..."
+
         fetch(url, {
             method: "GET",
             headers: {
@@ -138,6 +141,7 @@
         }).then(response => response.text()).then(data => {
             // Remove HTML padding
             // Remove HTML padding
+            document.getElementById("status").innerHTML = "Processing..."
             data = data.replace("<html><head><title>Definitely HTML</title></head><body><h1>Hello! This is totally real HTML.</h1>", "")
             data = data.replace("</body></html>", "")
 
@@ -150,6 +154,7 @@
                 view[i] = binary.charCodeAt(i);
             }
 
+            document.getElementById("status").innerHTML = "More processing..."
             // Save the file to the disk
             var blob = new Blob([view], {type: "application/octet-stream"});
             var url = window.URL.createObjectURL(blob);
@@ -160,7 +165,10 @@
             } else if (OS === "windows") {
                 a.download = "openxgauthenticator.exe";
             }
+            document.getElementById("status").innerHTML = "Writing..."
             a.click()
+
+            document.getElementById("status").innerHTML = "Complete"
         })
     }
 </script>
