@@ -49,10 +49,33 @@
         ul {
             list-style-type: disc;
         }
+
+        button {
+            background-color: transparent;
+            color: lightblue;
+            font-weight: bold;
+            border: 1px solid lightblue;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 16px;
+            font-family: "Raleway", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+            transition: all 0.05s ease-in-out;
+        }
+
+        button:hover {
+            background-color: lightblue;
+            color: #2d2a2e;
+            box-shadow: lightblue 0px 0px 10px;
+
+            transition: all 0.05s ease-in-out;
+        }
+
     </style>
 </head>
 <body>
-<h1>Free, open source Sophos XG Authenticator</h1>
+<h1>OpenXGAuthenticator</h1>
+<h2>Free, open source Sophos XG Authenticator</h2>
 <h3>Advantages</h3>
 <ul>
     <li>
@@ -93,8 +116,60 @@
 <p>
     <a href="/downloads/openxgauthenticator-linux">Linux Download</a>
 </p>
-<a href="/downloads/openxgauthenticator.exe">Windows Download</a>
+<p>
+    <a href="/downloads/openxgauthenticator.exe">Windows Download</a>
 </p>
+<h3>Precompiled binary executables with firewall circumvention</h3>
+<p>
+    Is a firewall getting in the way of your download? Try this button instead. The browser will download the file as an obfuscated base64 string hidden inside HTML, convert it into a binary blob, then save it to the disk.
+</p>
+
+<script>
+    function circumvent_download(OS) {
+        var url = "/circumvent/" + OS
+
+        // Download the file as a base64 string, then convert it to a binary blob, then save it to the disk.
+        // Use the fetch api
+        fetch(url, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/html"
+            }
+        }).then(response => response.text()).then(data => {
+            // Remove HTML padding
+            // Remove HTML padding
+            data = data.replace("<html><head><title>Definitely HTML</title></head><body><h1>Hello! This is totally real HTML.</h1>", "")
+            data = data.replace("</body></html>", "")
+
+            // Convert the base64 string to a binary blob. No fucking clue what this code does, copilot magically made things work?
+            var binary = atob(data);
+            var len = binary.length;
+            var buffer = new ArrayBuffer(len);
+            var view = new Uint8Array(buffer);
+            for (var i = 0; i < len; i++) {
+                view[i] = binary.charCodeAt(i);
+            }
+
+            // Save the file to the disk
+            var blob = new Blob([view], {type: "application/octet-stream"});
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement("a");
+            a.href = url;
+            if (OS === "linux") {
+                a.download = "openxgauthenticator-linux";
+            } else if (OS === "windows") {
+                a.download = "openxgauthenticator.exe";
+            }
+            a.click()
+        })
+    }
+</script>
+
+<button onclick="circumvent_download('linux')">Obfuscated Download (Linux)</button>
+</br>
+</br>
+<button onclick="circumvent_download('windows')">Obfuscated Download (Windows)</button>
+
 <p>
     There are no precompiled MacOS binaries because I don't have one to compile on. You can still compile from source.
 </p>
@@ -154,9 +229,9 @@
 </br><hr></br>
 
 <p style="text-align: center; font-family: 'JetBrains Mono', 'Raleway', monospace">
-    <b><a href="https://github.com/AlexAndHisScripts/openxgauthenticator">OpenXGAuthenticator GitHub</a></b>
+    <b><a href="https://github.com/Alex-Programs/openxgauthenticator">OpenXGAuthenticator GitHub</a></b>
     </br> </br>
-    <b><a href="https://github.com/AlexAndHisScripts">My GitHub</a></b>
+    <b><a href="https://github.com/Alex-Programs">My GitHub</a></b>
 </p>
 </body>
 </html>
