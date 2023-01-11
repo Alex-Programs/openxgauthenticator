@@ -8,7 +8,6 @@ Free, open source authenticator for [Sophos XG]((https://www.sophos.com/en-us/me
 - Fast and lightweight
 - Handles loss of connection better
 - Additional configuration options
-- Appears to ignore some types of user-account banning, whereby the firewall simply requests the client not let you join. (Unconfirmed)
 - User agent faking feature allows you to pretend you're using a browser to authenticate
 - Can be downloaded from github or the website instead of having to manually authenticate then use the local web portal to download the binary.
 - Absolutely no data exfiltration, telemetry, or spyware - and you can prove it by looking at the code.
@@ -24,7 +23,6 @@ Free, open source authenticator for [Sophos XG]((https://www.sophos.com/en-us/me
 
 ### Circumventing download
 The website, [openxg.alexcj.co.uk](https://openxg.alexcj.co.uk), contains a tool for downloading the executables behind firewalls that block them.
-
 
 There are no precompiled MacOS binaries because I don't have one to compile on. You can still compile from source.
 
