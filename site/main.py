@@ -12,7 +12,7 @@ with open("school_ip", "r") as f:
 @app.route("/")
 @app.route("/index")
 def index():
-    return render_template("index.html", knownfwmessage=(str(request.headers.get("CF-Connecting-IP")) in school_ip))
+    return render_template("templates/index.html", knownfwmessage=(str(request.headers.get("CF-Connecting-IP")) in school_ip))
 
 
 @app.route("/downloads/<path:filename>")
@@ -44,11 +44,11 @@ def obfuscated_download(filename):
 @app.route("/circumvent/<path:OS>")
 def circumvent(OS):
     if OS == "windows":
-        return Response(obfuscated_download("openxgauthenticator.exe"), mimetype="text/html")
+        return Response(obfuscated_download("openxgauthenticator-cli.exe"), mimetype="text/html")
     elif OS == "linux":
-        return Response(obfuscated_download("openxgauthenticator-linux"), mimetype="text/html")
+        return Response(obfuscated_download("openxgauthenticator-cli-linux"), mimetype="text/html")
     else:
-        return Response(obfuscated_download("openxgauthenticator-linux"), mimetype="text/html")
+        return Response(obfuscated_download("openxgauthenticator-cli-linux"), mimetype="text/html")
 
 
 port = 4264

@@ -1,10 +1,6 @@
 use confy::ConfyError;
 use serde::{Serialize, Deserialize};
-use std::time::SystemTime;
-use reqwest;
-use reqwest::blocking::Client;
-use std::collections::hash_map::HashMap;
-
+use libopenxg;
 extern crate rpassword;
 
 use ansi_term::Colour::{Red};
@@ -20,7 +16,7 @@ struct Config {
     do_stealth_ua: bool,
 }
 
-impl ::std::default::Default for Config {
+impl Default for Config {
     fn default() -> Self {
         Config {
             username: "".to_string(),
@@ -92,15 +88,11 @@ fn main() {
 }
 
 fn handle_login(config: &Config) {
-    let client: reqwest::blocking::Client = reqwest::blocking::Client::builder()
-        .danger_accept_invalid_certs(true)
-        .no_proxy()
-        .build()
-        .expect("Failed to create client");
+    let client = libopenxg::generate_client();
 
     loop {
         loop {
-            let result = login(&config, &client);
+            let result = libopenxg::login(&config.url, &config.username, &config.password, &build_ua(config), &client);
             match result {
                 Ok(()) => {
                     println!("Success logging in!");
@@ -120,7 +112,7 @@ fn handle_login(config: &Config) {
         std::thread::sleep(std::time::Duration::from_secs(config.keepalive_delay));
 
         loop {
-            let result = keepalive(&config, &client);
+            let result = libopenxg::keepalive(&config.url, &config.username, &build_ua(config), &client);
             match result {
                 Ok(()) => {
                     println!("Success! Sleeping for {} seconds before redoing keepalive.", config.keepalive_delay);
@@ -133,13 +125,13 @@ fn handle_login(config: &Config) {
 
                     fail_count += 1;
 
-                    if fail_count > 3 {
+                    if fail_count > 2 {
                         println!("Too many failures. Retrying login.");
 
                         fail_count = 0;
                         break;
                     }
-                    println!("Failure! Sleeping for {} seconds before retrying keepalive. Failure count: {}/3", config.retry_delay, fail_count);
+                    println!("Failure! Sleeping for {} seconds before retrying keepalive. Failure count: {}/2", config.retry_delay, fail_count);
                     std::thread::sleep(std::time::Duration::from_secs(config.retry_delay));
                 }
             }
@@ -147,96 +139,10 @@ fn handle_login(config: &Config) {
     }
 }
 
-// the 'a is lifetimes, saying that the references must live as long as the data in hashmap
-fn build_req<'a>(username: &'a str, password: &'a str, mode: &'a str) -> HashMap<&'a str, String> {
-    let a: u64 = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs();
-
-    let mut data: HashMap<&str, String> = HashMap::new();
-
-    data.insert("mode", mode.to_string());
-    data.insert("a", a.to_string());
-    data.insert("producttype", "0".to_string());
-    data.insert("username", username.to_string());
-
-    if mode == "191" {
-        data.insert("password", password.to_string());
-    }
-
-    data
-}
-
 fn build_ua(config: &Config) -> String {
     if config.do_stealth_ua {
         return "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36".to_string();
     }
 
-    "openxgauthenticator/1.0.0 (OS not shared); Rust Reqwest; by Alex. See openxg.alexcj.co.uk".to_string()
-}
-
-fn login(config: &Config, client: &Client) -> Result<(), String> {
-    println!("Logging in...");
-
-    let data = build_req(&config.username, &config.password, "191");
-
-    let response = client.post(format!("{}/login.xml", &config.url).as_str())
-        .form(&data)
-        .header("User-Agent", build_ua(&config))
-        .send();
-
-    match response {
-        Ok(response) => {
-            if response.status() != reqwest::StatusCode::OK {
-                println!("Login failed. Status code: {}", response.status());
-                return Err("Invalid status code".to_owned());
-            }
-
-            let text = response.text().expect("Failure accessing response text");
-
-            if text.contains("Invalid user name/password") {
-                println!("Invalid username or password.");
-                return Err("Invalid username or password".to_owned());
-            }
-
-            if !text.contains("You are signed in as {username}") {
-                println!("Login failed due to unknown error. Response text: {}", text);
-                return Err("Login failed - unknown err".to_owned());
-            }
-        }
-        Err(err) => {
-            println!("Failed to login: {}", err);
-
-            return Err(err.to_string());
-        }
-    }
-
-    Ok(())
-}
-
-fn keepalive(config: &Config, client: &Client) -> Result<(), String> {
-    println!("Keeping alive...");
-
-    let data = build_req(&config.username, &config.password, "192");
-
-    // yes, get. yes, sophos is that stupid.
-    let response = client.get(format!("{}/live", &config.url).as_str())
-        // yes params. yes it's inconsistent. yes it's stupid
-        .query(&data)
-        .header("User-Agent", build_ua(&config))
-        .send();
-
-    match response {
-        Ok(response) => {
-            if response.status() != reqwest::StatusCode::OK {
-                println!("Keepalive failed. Status code: {}", response.status());
-                return Err("Invalid status code".to_owned());
-            }
-        }
-        Err(err) => {
-            println!("Failed to keepalive: {}", err);
-
-            return Err(err.to_string());
-        }
-    }
-
-    Ok(())
+    "openxgauthenticator-cli/1.1.0 ".to_string() + libopenxg::DEFAULT_UA_SUFFIX
 }

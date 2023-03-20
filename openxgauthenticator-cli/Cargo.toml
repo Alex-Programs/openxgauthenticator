@@ -1,6 +1,6 @@
 [package]
-name = "openxgauthenticator"
-version = "0.1.0"
+name = "openxgauthenticator-cli"
+version = "1.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -8,7 +8,6 @@ edition = "2021"
 [dependencies]
 confy = "0.4.0"
 serde = {version = "1.0", features = ["derive"]}
-reqwest = {version = "0.11.9", features = ["blocking", "rustls"]}
 rpassword = "5.0.1"
 ansi_term = "0.12"
-rustls = "0.20"
+libopenxg = "0.1.2"

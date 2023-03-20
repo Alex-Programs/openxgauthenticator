@@ -2,6 +2,8 @@
 
 Free, open source authenticator for [Sophos XG]((https://www.sophos.com/en-us/medialibrary/pdfs/factsheets/sophos-xg-series-appliances-brna.pdf)). Login to firewalls with a single command.
 
+It utilises my [libopenxg](https://github.com/Alex-Programs/libopenxg) library.
+
 ### Advantages
 - Code is auditable and customisable due to being open source.
 - Easier to install, producing a single executable file.
