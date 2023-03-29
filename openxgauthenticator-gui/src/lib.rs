@@ -3,4 +3,5 @@
 mod app;
 mod config;
 mod update_thread;
+mod ua;
 pub use app::OpenXGApp;
