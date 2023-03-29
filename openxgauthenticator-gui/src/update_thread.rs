@@ -116,6 +116,10 @@ pub fn start_update_thread(config: &Config) {
                             last_keepalive_login_time = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs() as i64;
                             are_logged_in = true;
                             ARE_LOGGED_IN.lock().unwrap().clone_from(&true);
+
+                            if SHARED_UPDATE_THREAD_STATE.lock().unwrap().auto_update {
+                                crate::self_update::self_update_thread();
+                            }
                         },
                         Err(e) => {
                             set_status(format!("Login error: {}", e));

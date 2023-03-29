@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>OpenXGAuthenticator</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,800&family=Raleway:wght@400;500;600;700&display=swap"
+          rel="stylesheet">
+
+    <meta property="og:title" content="OpenXGAuthenticator"/>
+    <meta property="og:description" content="Rust-based, open-source Sophos XG Authenticator">
+
+    <style>
+        body {
+            max-width: 800px;
+            margin: auto;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-size: 18px;
+        }
+
+        h1, h2, h3, h4, h5, h6, h7, h8 {
+            font-family: "Raleway", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: #64aeff;
+        }
+
+        code {
+            font-family: "JetBrains Mono", monospace;
+            font-size: 16px;
+            background-color: #3b434d;
+        }
+
+        body, html {
+            background-color: #2d2a2e;
+            height: 100%;
+            width: 100%;
+
+            color: white;
+        }
+
+        a {
+            color: lightblue;
+        }
+
+        a:visited {
+            color: lightblue;
+        }
+
+        ul {
+            list-style-type: disc;
+        }
+
+        button {
+            background-color: transparent;
+            color: lightblue;
+            font-weight: bold;
+            border: 1px solid lightblue;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 16px;
+            font-family: "Raleway", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+            transition: all 0.05s ease-in-out;
+        }
+
+        button:hover {
+            background-color: lightblue;
+            color: #2d2a2e;
+            box-shadow: lightblue 0px 0px 10px;
+
+            transition: all 0.05s ease-in-out;
+        }
+
+        .download-box {
+            margin: 20px 0px;
+
+            border: 2px solid lightblue;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .download-box > * {
+            margin: 10px;
+        }
+
+        .download-box > code {
+            width: 100%;
+            margin-bottom: 0;
+        }
+
+        #dl-logs {
+            padding: 15px;
+        }
+    </style>
+</head>
+<body>
+<h1>OpenXGAuthenticator</h1>
+<h2>Free, open source Sophos XG Authenticator</h2>
+<p>OpenXG is a free and open source Sophos XG authenticator built on my <a href="https://github.com/Alex-Programs/libopenxg">libopenxg</a> library.</p>
+<p>It was previously a CLI application, but it's now a GUI application built with egui with additional features. OpenXG is written in Rust.</p>
+<h3>Advantages</h3>
+<ul>
+    <li>Free and open source</li>
+    <li>Lightweight</li>
+    <li>Gracefully handles connection loss</li>
+    <li>Stealth mode to make you appear to use the currently-most-common browser</li>
+    <li>Distributed as .zip files, so it shouldn't be blocked by firewalls.</li>
+    <li>Supports Linux and Windows</li>
+</ul>
+
+</br>
+<hr>
+</br>
+
+<h2>Installation</h2>
+Simply download the latest release for your operating system from the <a href="https://github.com/Alex-Programs/openxgauthenticator/releases">releases page</a> and extract the .zip file.
+
+<p>
+    There are no precompiled MacOS binaries because I don't have a mac to compile on and the cross-compile process looks
+    like a <a href="https://wapl.es/rust/2019/02/17/rust-cross-compile-linux-to-macos.html">complete pain</a> and
+    altogether not worth it. You can still compile from source.
+</p>
+
+</br>
+<hr>
+</br>
+
+<h3>Compile from source (Code can be checked)</h3>
+<ol>
+    <li>Install Rust Stable from your package manager or <a href="https://www.rust-lang.org/tools/install">rust-lang.org/tools/install</a>
+    </li>
+
+    <li>Clone the repository (<a href="https://github.com/Alex-Programs/openxgauthenticator">github.com/Alex-Programs/openxgauthenticator</a>)
+        to your local machine
+    </li>
+
+    <li>Open the repository in a terminal and go into the <code>openxgauthenticator</code> directory</li>
+
+    <li>[Optional] read the code in the <code>src</code> directory to check that it's safe.</li>
+
+    <li>Run <code>cargo build --release</code></li>
+
+    <li>Wait for compilation to complete. Subsequent compilations should be faster.</li>
+
+    <li>Your compiled binary executable should be in the <code>target/release</code> folder. There will be additional
+        files alongside the executable - the executable should just be the file <code>openxgauthenticator</code> for
+        Linux, or <code>openxgauthenticator.exe</code> for Windows
+    </li>
+</ol>
+
+</br>
+<hr>
+</br>
+
+<h2 id="usage">Usage</h2>
+
+<p>Move <code>openxgauthenticator</code> to a directory where you can easily access it and run it. Setup your configuration in the GUI and click "Save".</p>
+
+<p>You may want to set it up to run at startup or create a shortcut, but this isn't necessary, and the executable is standalone.</p>
+
+</br>
+<hr>
+</br>
+
+<p style="text-align: center; font-family: 'JetBrains Mono', 'Raleway', monospace">
+    <b><a href="https://github.com/Alex-Programs/openxgauthenticator">OpenXGAuthenticator GitHub</a></b>
+    </br> </br>
+    <b><a href="https://github.com/Alex-Programs/libopenxg">libopenxg Github</a></b>
+    </br> </br>
+    <b><a href="https://github.com/Alex-Programs">My GitHub</a></b>
+</p>
+</body>
+</html>

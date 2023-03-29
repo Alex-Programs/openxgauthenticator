@@ -15,6 +15,7 @@ pub struct Config {
     pub keepalive_delay: u64,
     pub retry_delay: u64,
     pub calc_current_ua: String,
+    pub auto_update: bool,
 }
 
 impl Default for Config {
@@ -29,6 +30,7 @@ impl Default for Config {
             keepalive_delay: 90,
             retry_delay: 5,
             calc_current_ua: "NO UA".to_string(),
+            auto_update: true,
         }
     }
 }
@@ -75,6 +77,7 @@ impl Into<Config> for OldConfig {
             keepalive_delay: self.keepalive_delay,
             retry_delay: self.retry_delay,
             calc_current_ua: ua,
+            auto_update: true,
         }
     }
 }

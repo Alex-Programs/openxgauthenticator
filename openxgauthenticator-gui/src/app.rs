@@ -7,6 +7,7 @@ use once_cell::sync::Lazy;
 use std::sync::Mutex;
 
 pub static UA_STATUS: Lazy<Mutex<String>> = Lazy::new(|| Mutex::new("No UA Status Data".to_string()));
+pub static AUTO_UPDATE_STATUS: Lazy<Mutex<String>> = Lazy::new(|| Mutex::new("No Auto Update Status Data".to_string()));
 
 pub struct OpenXGApp {
     config: Config,
@@ -89,6 +90,8 @@ impl eframe::App for OpenXGApp {
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.heading("OpenXGAuthenticator GUI");
 
+            ui.heading("Alternate Version but not idk");
+
             ui.separator();
 
             ui.heading("Status");
@@ -154,6 +157,11 @@ impl eframe::App for OpenXGApp {
             ui.add(egui::Slider::new(&mut config.retry_delay, 1..=30));
 
             ui.separator();
+
+            ui.label("Do automatic updates?");
+            ui.checkbox(&mut config.auto_update, "Automatic updates");
+
+            ui.label("Status: ".to_string() + &AUTO_UPDATE_STATUS.lock().unwrap().to_string());
 
             if ui.button("Save").clicked() {
                 // Create thread to save config

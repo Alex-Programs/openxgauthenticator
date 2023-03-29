@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "openxgauthenticator-cli"
+		},
+		{
+			"path": "openxgauthenticator-gui"
+		},
+		{
+			"path": "site"
+		}
+	],
+	"settings": {}
+}
