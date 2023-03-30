@@ -90,8 +90,6 @@ impl eframe::App for OpenXGApp {
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.heading("OpenXGAuthenticator GUI");
 
-            ui.heading("Alternate Version but not idk");
-
             ui.separator();
 
             ui.heading("Status");
@@ -144,6 +142,13 @@ impl eframe::App for OpenXGApp {
 
             if ui.button("Reset UA to default").clicked() {
                 config.user_agent = "OpenXGAuthenticator GUI ".to_string() + libopenxg::DEFAULT_UA_SUFFIX;
+                config.set_ua_most_common = false;
+                config.calc_current_ua = ua::get_current_ua(config);
+
+                {
+                    let mut lock = crate::update_thread::SHARED_UPDATE_THREAD_STATE.lock().unwrap();
+                    lock.user_agent = config.user_agent.clone();
+                }
             }
 
             ui.label("Status: ".to_string() + &UA_STATUS.lock().unwrap().to_string());
