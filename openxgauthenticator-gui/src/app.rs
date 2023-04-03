@@ -167,10 +167,16 @@ impl eframe::App for OpenXGApp {
                 update_thread::SHARED_UPDATE_THREAD_STATE.lock().unwrap().clone_from(config);
             }
 
+            if *update_thread::ARE_LOGGED_IN.read().unwrap() {
+                if ui.button("Force Re-Login").clicked() {
+                    update_thread::FORCE_RELOGIN.write().unwrap().clone_from(&true);
+                }
+            }
+
             ui.separator();
 
             ui.heading("Status");
-            ui.label("Connection Status: ".to_string() + update_thread::CURRENT_STATUS.lock().unwrap().as_str());
+            ui.label("Connection Status: ".to_string() + update_thread::CURRENT_STATUS.read().unwrap().as_str());
 
             ui.separator();
 

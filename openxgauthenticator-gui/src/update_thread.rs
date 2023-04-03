@@ -1,5 +1,6 @@
 use libopenxg;
 use std::sync::Mutex;
+use std::sync::RwLock;
 use crate::app::UA_STATUS;
 use crate::config::Config;
 use std::time::SystemTime;
@@ -8,9 +9,9 @@ use once_cell::sync::Lazy;
 use crate::ua;
 
 pub static SHARED_UPDATE_THREAD_STATE: Lazy<Mutex<Config>> = Lazy::new(|| Mutex::new(Config::default()));
-pub static CURRENT_STATUS: Lazy<Mutex<String>> = Lazy::new(|| Mutex::new("No Status Data".to_string()));
-pub static ARE_LOGGED_IN : Lazy<Mutex<bool> >= Lazy::new(|| Mutex::new(false));
-pub static FORCE_RELOGIN : Lazy<Mutex<bool> >= Lazy::new(|| Mutex::new(false));
+pub static CURRENT_STATUS: Lazy<RwLock<String>> = Lazy::new(|| RwLock::new("No Status Data".to_string()));
+pub static ARE_LOGGED_IN : Lazy<RwLock<bool> >= Lazy::new(|| RwLock::new(false));
+pub static FORCE_RELOGIN : Lazy<RwLock<bool> >= Lazy::new(|| RwLock::new(false));
 
 pub fn ua_update_thread() {
     std::thread::spawn(|| {
@@ -22,7 +23,7 @@ pub fn ua_update_thread() {
                 UA_STATUS.lock().unwrap().clone_from(&"Waiting for login before UA update".to_string());
             }
 
-            if ARE_LOGGED_IN.lock().unwrap().to_owned() {
+            if *ARE_LOGGED_IN.read().unwrap() {
                 break;
             }
         }
@@ -63,7 +64,6 @@ pub fn start_update_thread(config: &Config) {
     std::thread::spawn(|| {
         let mut client = libopenxg::generate_client();
 
-        let mut are_logged_in = false;
         let mut last_login_fail_time: i64 = 0;
         let mut last_login_error = "".to_string();
         let mut last_login_keepalive_error_type = "Login".to_string();
@@ -72,14 +72,14 @@ pub fn start_update_thread(config: &Config) {
         loop {
             sleep(std::time::Duration::from_secs(1));
 
-            if FORCE_RELOGIN.lock().unwrap().to_owned() {
-                are_logged_in = false;
-                FORCE_RELOGIN.lock().unwrap().clone_from(&false);
+            if *FORCE_RELOGIN.read().unwrap() {
+                ARE_LOGGED_IN.write().unwrap().clone_from(&false);
+                FORCE_RELOGIN.write().unwrap().clone_from(&false);
             }
 
             let current_state = SHARED_UPDATE_THREAD_STATE.lock().unwrap().clone();
 
-            if are_logged_in {
+            if *ARE_LOGGED_IN.read().unwrap() {
                 let time_until_keepalive: i64 = last_keepalive_login_time + (current_state.keepalive_delay as i64) - (SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs() as i64);
 
                 if time_until_keepalive > 0 {
@@ -96,7 +96,7 @@ pub fn start_update_thread(config: &Config) {
                         },
                         Err(e) => {
                             set_status(format!("Keepalive error: {}", e));
-                            are_logged_in = false;
+                            ARE_LOGGED_IN.write().unwrap().clone_from(&false);
                             last_login_fail_time = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs() as i64;
                             last_login_error = e.to_string();
                             last_login_keepalive_error_type = "Keepalive".to_string();
@@ -117,8 +117,7 @@ pub fn start_update_thread(config: &Config) {
                         Ok(_) => {
                             set_status("Logged in".to_string());
                             last_keepalive_login_time = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs() as i64;
-                            are_logged_in = true;
-                            ARE_LOGGED_IN.lock().unwrap().clone_from(&true);
+                            ARE_LOGGED_IN.write().unwrap().clone_from(&true);
 
                             if SHARED_UPDATE_THREAD_STATE.lock().unwrap().auto_update {
                                 crate::self_update::self_update_thread();
@@ -141,6 +140,6 @@ pub fn start_update_thread(config: &Config) {
 }
 
 fn set_status(status: String) {
-    CURRENT_STATUS.lock().unwrap().clone_from(&status);
+    CURRENT_STATUS.write().unwrap().clone_from(&status);
     println!("{}", status);
 }
