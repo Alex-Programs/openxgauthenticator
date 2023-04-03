@@ -1,4 +1,4 @@
-use self_update;
+use self_update_danger_no_ssl_verify as self_update;
 
 fn do_self_update() {
     log("Starting self update...".to_string());

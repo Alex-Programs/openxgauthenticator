@@ -2017,7 +2017,7 @@ dependencies = [
  "libopenxg",
  "once_cell",
  "reqwest",
- "self_update",
+ "self_update_danger_no_ssl_verify",
  "serde",
  "toml 0.7.3",
  "tracing-subscriber",
@@ -2519,10 +2519,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "self_update"
-version = "0.36.0"
+name = "self_update_danger_no_ssl_verify"
+version = "0.38.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ca4e4e6f29fddb78b3e7a6e5a395e8274d4aca2d36b2278a297fa49673a5b7c7"
+checksum = "bbdb5241a665b523ed98a7192472ec34971754f70ea88bb0e3b58c420ede4b53"
 dependencies = [
  "hyper",
  "indicatif",
