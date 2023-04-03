@@ -1,13 +1,33 @@
 #![warn(clippy::all, rust_2018_idioms)]
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // hide console window on Windows in release
 
+const img_embedded: &[u8; 12285] = include_bytes!("../../icon.png");
+
 // When compiling natively:
 #[cfg(not(target_arch = "wasm32"))]
 fn main() -> eframe::Result<()> {
     // Log to stdout (if you run with `RUST_LOG=debug`).
     tracing_subscriber::fmt::init();
 
-    let native_options = eframe::NativeOptions::default();
+    //let img_embedded = include_bytes!("../../icon.png");
+    let icon = image::load_from_memory(img_embedded).expect("Failed to open icon").to_rgba8();
+
+    let (w, h) = icon.dimensions();
+
+    let mut native_options = eframe::NativeOptions {
+        resizable: true,
+        initial_window_size: Some(egui::Vec2 {x: 400.0, y: 600.0}),
+        min_window_size: Some(egui::Vec2 {x: 400.0, y: 600.0}),
+        icon_data: Some(eframe::IconData {
+            rgba: icon.into_raw(),
+            width: w,
+            height: h,
+        }),
+        decorated: false,
+        transparent: true,
+        ..Default::default()
+    };
+
     eframe::run_native(
         "OpenXG",
         native_options,
