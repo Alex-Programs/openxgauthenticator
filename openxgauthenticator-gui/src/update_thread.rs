@@ -10,6 +10,7 @@ use crate::ua;
 pub static SHARED_UPDATE_THREAD_STATE: Lazy<Mutex<Config>> = Lazy::new(|| Mutex::new(Config::default()));
 pub static CURRENT_STATUS: Lazy<Mutex<String>> = Lazy::new(|| Mutex::new("No Status Data".to_string()));
 pub static ARE_LOGGED_IN : Lazy<Mutex<bool> >= Lazy::new(|| Mutex::new(false));
+pub static FORCE_RELOGIN : Lazy<Mutex<bool> >= Lazy::new(|| Mutex::new(false));
 
 pub fn ua_update_thread() {
     std::thread::spawn(|| {
@@ -71,6 +72,11 @@ pub fn start_update_thread(config: &Config) {
 
         loop {
             sleep(std::time::Duration::from_secs(1));
+
+            if FORCE_RELOGIN.lock().unwrap().to_owned() {
+                are_logged_in = false;
+                FORCE_RELOGIN.lock().unwrap().clone_from(&false);
+            }
 
             let current_state = SHARED_UPDATE_THREAD_STATE.lock().unwrap().clone();
 

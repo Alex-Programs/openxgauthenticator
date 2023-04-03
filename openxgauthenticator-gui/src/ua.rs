@@ -3,11 +3,8 @@ use reqwest::blocking::Client;
 
 pub fn get_most_frequent_ua() -> Result<String, String> {
     // Get from API
-    let host = "https://api.openxg.alexcj.co.uk";
-    let path = "/most_frequent_ua";
-
-    let host = "https://api.myip.com";
-    let path = "";
+    let host = "https://openxg.alexcj.co.uk";
+    let path = "/most_common_ua.txt";
 
     let client = Client::builder()
         .user_agent("OpenXGAuthenticator GUI Collecting UA")

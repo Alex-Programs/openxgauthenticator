@@ -15,9 +15,17 @@ def update_most_common_ua():
 
     code_blocks = parsed.find_all("span", attrs={"class": "code"})
 
-    print(code_blockcs)
+    most_common = None
+    for block in code_blocks:
+        if "Mozilla" in block.text or "Chrome" in block.text or "KHTML" in block.text or "Windows" in block.text or "x64" in block.text:
+            most_common = block.text
+            break
 
-    return code_blocks
+    if most_common is None:
+        print("No most common user agent found; abort")
+        import sys; sys.exit()
+
+    return most_common
 
 ua = update_most_common_ua()
 
