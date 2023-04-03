@@ -1,10 +1,12 @@
 use crate::config::Config;
 use catppuccin_egui;
+use egui_extras::RetainedImage;
 use crate::update_thread;
 use crate::config;
 use crate::ua;
 use once_cell::sync::Lazy;
 use std::sync::Mutex;
+use egui_extras;
 
 pub static UA_STATUS: Lazy<Mutex<String>> = Lazy::new(|| Mutex::new("No UA Status Data".to_string()));
 pub static AUTO_UPDATE_STATUS: Lazy<Mutex<String>> = Lazy::new(|| Mutex::new("No Auto Update Status Data".to_string()));
@@ -12,6 +14,7 @@ pub static AUTO_UPDATE_STATUS: Lazy<Mutex<String>> = Lazy::new(|| Mutex::new("No
 pub struct OpenXGApp {
     config: Config,
     show_old_config_popup: bool,
+    retained_icon: egui_extras::image::RetainedImage,
 }
 
 impl OpenXGApp {
@@ -28,13 +31,17 @@ impl OpenXGApp {
 
         config.calc_current_ua = ua::get_current_ua(&mut config);
 
-        // TODO icon
         update_thread::start_update_thread(&config);
         update_thread::ua_update_thread();
+
+        // Load icon for title bar
+        let retained_icon = egui_extras::image::RetainedImage::from_image_bytes("TitleIcon", crate::EMBEDDED_IMG_DATA)
+            .expect("Failed to load retained image");
 
         Self {
             config,
             show_old_config_popup: config::does_old_config_exist(),
+            retained_icon
         }
     }
 }
@@ -50,6 +57,7 @@ impl eframe::App for OpenXGApp {
         let Self {
             ref mut config,
             ref mut show_old_config_popup,
+            ref mut retained_icon,
         } = self;
 
         // Minimum FPS (1)
@@ -82,11 +90,6 @@ impl eframe::App for OpenXGApp {
         }
 
         custom_window_frame(ctx, _frame, "OpenXG", |ui| {
-            ui.heading("Status");
-            ui.label(update_thread::CURRENT_STATUS.lock().unwrap().to_string());
-
-            ui.separator();
-
             ui.label("Address");
 
             let url_edit = egui::TextEdit::singleline(&mut config.url)
@@ -141,8 +144,6 @@ impl eframe::App for OpenXGApp {
                 }
             }
 
-            ui.label("Status: ".to_string() + &UA_STATUS.lock().unwrap().to_string());
-
             ui.separator();
 
             ui.label("Keep alive interval (seconds):");
@@ -156,7 +157,7 @@ impl eframe::App for OpenXGApp {
             ui.label("Do automatic updates?");
             ui.checkbox(&mut config.auto_update, "Automatic updates");
 
-            ui.label("Status: ".to_string() + &AUTO_UPDATE_STATUS.lock().unwrap().to_string());
+            ui.separator();
 
             if ui.button("Save").clicked() {
                 // Create thread to save config
@@ -166,7 +167,18 @@ impl eframe::App for OpenXGApp {
                 update_thread::SHARED_UPDATE_THREAD_STATE.lock().unwrap().clone_from(config);
             }
 
-            // TODO option to start at startup
+            ui.separator();
+
+            ui.heading("Status");
+            ui.label("Connection Status: ".to_string() + update_thread::CURRENT_STATUS.lock().unwrap().as_str());
+
+            ui.separator();
+
+            ui.label("User-Agent Pull Status: ".to_string() + &UA_STATUS.lock().unwrap().to_string());
+
+            ui.separator();
+
+            ui.label("Automatic Update Status: ".to_string() + &AUTO_UPDATE_STATUS.lock().unwrap().to_string());
 
             egui::warn_if_debug_build(ui);
         });
@@ -220,11 +232,11 @@ fn title_bar_ui(
 ) {
     use egui::*;
 
-    let painter = ui.painter();
-
     let title_bar_response = ui.interact(title_bar_rect, Id::new("title_bar"), Sense::click());
 
     // Paint the title:
+    let painter = ui.painter();
+
     painter.text(
         title_bar_rect.center(),
         Align2::CENTER_CENTER,
