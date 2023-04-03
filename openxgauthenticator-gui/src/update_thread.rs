@@ -49,7 +49,6 @@ pub fn ua_update_thread() {
                     return;
                 },
                 Err(e) => {
-                    println!("Error getting most common UA: {}", e);
                     crate::app::UA_STATUS.lock().unwrap().clone_from(&e);
                     sleep(std::time::Duration::from_secs(30));
                 }
@@ -79,8 +78,6 @@ pub fn start_update_thread(config: &Config) {
             }
 
             let current_state = SHARED_UPDATE_THREAD_STATE.lock().unwrap().clone();
-
-            println!("{:?}", current_state);
 
             if are_logged_in {
                 let time_until_keepalive: i64 = last_keepalive_login_time + (current_state.keepalive_delay as i64) - (SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs() as i64);
