@@ -186,6 +186,10 @@ impl eframe::App for OpenXGApp {
 
             ui.label("Automatic Update Status: ".to_string() + &AUTO_UPDATE_STATUS.lock().unwrap().to_string());
 
+            ui.separator();
+
+            ui.label("Written by Alex. Thanks to Crow for the logo.");
+
             egui::warn_if_debug_build(ui);
         });
     }
