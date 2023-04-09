@@ -1,3 +1,3 @@
-pip install beautifulsoup4
-pip install requests
+pip3 install beautifulsoup4
+pip3 install requests
 python3 ./update_most_common_ua.py
