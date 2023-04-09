@@ -1,6 +1,6 @@
 [package]
 name = "openxgauthenticator-gui"
-version = "0.1.2"
+version = "0.1.3"
 authors = ["Alex-Programs <alex@alexcj.co.uk"]
 edition = "2021"
 
