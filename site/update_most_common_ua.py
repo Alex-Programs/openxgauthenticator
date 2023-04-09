@@ -8,7 +8,7 @@ def update_most_common_ua():
     r = requests.get(url)
 
     if r.status_code != 200:
-        print(f"Non 200 status code; abort with status code: " + str(r.status_code))
+        print("Non 200 status code; abort with status code: " + str(r.status_code))
         import sys; sys.exit()
 
     # parse with bs4
