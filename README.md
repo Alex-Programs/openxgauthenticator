@@ -1,5 +1,5 @@
 <div>
-  <img src="icon.svg" height="60px" align="left"> <h1>openxgauthenticator</h1>
+  <img src="icon.png" height="60px" align="left"> <h1>openxgauthenticator</h1>
 </div>
 
 <br>
